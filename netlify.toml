@@ -1,0 +1,11 @@
+[build]
+  # Tell Netlify to build the frontend directory
+  base = "frontend"
+  publish = "dist"
+  command = "npm run build"
+
+# SPA routing redirect rule so all paths load index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

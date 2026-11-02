@@ -1,0 +1,10 @@
+{
+  "name": "swarnapost-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SwarnaPost - Sri Chairman Jewellers Daily Rate Poster & WhatsApp Broadcaster",
+  "scripts": {
+    "build": "npm --prefix frontend run build",
+    "dev": "npm --prefix frontend run dev"
+  }
+}
