@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Mukta+Malar:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=Anek+Tamil:wght@400;600;700;800&family=Baloo+Thambi+2:wght@500;600;700;800&display=swap');
+@import "tailwindcss";
+
+:root {
+  --font-serif: 'Cinzel', serif;
+  --font-tamil: 'Noto Sans Tamil', 'Mukta Malar', sans-serif;
+  --font-tamil-ornate: 'Baloo Thambi 2', 'Mukta Malar', sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #0b0907;
+  color: #f3f0e6;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #14120e;
+}
+::-webkit-scrollbar-thumb {
+  background: #3d3420;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #68552e;
+}
+
+/* Gold Metallic Gradients */
+.gold-text-gradient {
+  background: linear-gradient(180deg, #fff7c2 0%, #f7d070 30%, #d49c2e 60%, #9e6d0d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.silver-text-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #e8ebee 30%, #b8c1c9 60%, #76818e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-border-gradient {
+  border-image: linear-gradient(135deg, #fce085, #cfa03f, #825c15, #fad779) 1;
+}
+
+/* Embossed 3D Gold Text Effect */
+.gold-emboss {
+  color: #fce8a6;
+  text-shadow: 
+    0 1px 0 #936e1b,
+    0 2px 0 #7e5c12,
+    0 3px 0 #684b0c,
+    0 4px 5px rgba(0,0,0,0.8),
+    0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.gold-glow {
+  box-shadow: 0 0 25px rgba(212, 163, 50, 0.25);
+}
+
+.gold-glow-strong {
+  box-shadow: 0 0 35px rgba(245, 197, 66, 0.45);
+}
+
+/* Shimmer animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer-badge {
+  background: linear-gradient(90deg, rgba(255,215,0,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,215,0,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite linear;
+}
