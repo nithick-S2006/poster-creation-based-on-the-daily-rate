@@ -1,36 +1,30 @@
 import React, { useState } from 'react';
-import { X, Check, Copy, ExternalLink, Share2, Smartphone, Send } from 'lucide-react';
+import { X, Check, Copy, ExternalLink, Share2 } from 'lucide-react';
 
 interface WhatsAppGuideModalProps {
   isOpen: boolean;
-  messageText: string;
   whatsappUrl: string;
-  whatsappAppUrl?: string;
   filename: string;
-  recipientPhone: string;
   onClose: () => void;
+  onCopyImageAgain?: () => Promise<void>;
 }
 
 export const WhatsAppGuideModal: React.FC<WhatsAppGuideModalProps> = ({
   isOpen,
-  messageText,
   whatsappUrl,
-  whatsappAppUrl,
   filename,
-  recipientPhone,
   onClose,
+  onCopyImageAgain,
 }) => {
-  const [copiedText, setCopiedText] = useState(false);
+  const [copiedSuccess, setCopiedSuccess] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleCopyText = async () => {
-    try {
-      await navigator.clipboard.writeText(messageText);
-      setCopiedText(true);
-      setTimeout(() => setCopiedText(false), 2000);
-    } catch {
-      // fallback
+  const handleCopyClick = async () => {
+    if (onCopyImageAgain) {
+      await onCopyImageAgain();
+      setCopiedSuccess(true);
+      setTimeout(() => setCopiedSuccess(false), 2000);
     }
   };
 
@@ -45,17 +39,17 @@ export const WhatsAppGuideModal: React.FC<WhatsAppGuideModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white tracking-wide">
-                WhatsApp Direct Send
+                Share Poster on WhatsApp
               </h2>
-              <p className="text-xs text-emerald-400 font-medium">
-                Sending directly to: <span className="font-mono text-white">{recipientPhone || 'Configured Recipient'}</span>
+              <p className="text-xs text-emerald-300 font-medium">
+                No default contact • Send to any contact, group, or status
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="p-1.5 text-[#9a8d77] hover:text-white rounded-lg transition-all"
+            className="p-1.5 text-[#9a8d77] hover:text-white rounded-lg transition-all cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -68,10 +62,10 @@ export const WhatsAppGuideModal: React.FC<WhatsAppGuideModalProps> = ({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-emerald-300 font-bold text-sm">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Chat launched & poster ready!</span>
+                <span>Image Copied & Ready!</span>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-200 border border-emerald-600/40">
-                Auto-Copied to Clipboard
+                Clipboard Ready
               </span>
             </div>
             <p className="font-mono text-[11px] text-[#f7d070] bg-[#110d07] px-2.5 py-1.5 rounded-lg border border-[#3e3016] break-all">
@@ -80,82 +74,57 @@ export const WhatsAppGuideModal: React.FC<WhatsAppGuideModalProps> = ({
           </div>
 
           {/* Quick instructions */}
-          <div className="space-y-2 text-[#cfb684]">
-            <h3 className="font-bold text-[#f7d070] uppercase tracking-wide text-[11px] flex items-center gap-1.5">
-              <Send className="w-3.5 h-3.5 text-emerald-400" /> Sending to Recipient:
+          <div className="space-y-2.5 text-[#cfb684]">
+            <h3 className="font-bold text-[#f7d070] uppercase tracking-wide text-[11px]">
+              How to Send in WhatsApp:
             </h3>
-            <ol className="list-decimal list-inside space-y-1.5 text-[#b5a790] leading-relaxed">
+            <ol className="list-decimal list-inside space-y-2 text-[#b5a790] leading-relaxed">
               <li>
-                WhatsApp has opened a direct conversation with <strong className="text-white font-mono">{recipientPhone}</strong>.
+                In the opened WhatsApp window, click on <strong className="text-white">any contact, customer, group, or Status</strong>.
               </li>
               <li>
-                The poster image is already copied to your clipboard! Simply press <kbd className="px-1.5 py-0.5 bg-[#251e12] rounded border border-[#443317] font-mono text-white text-[10px]">Ctrl + V</kbd> in WhatsApp to paste and send.
+                Click the chat input box and press <kbd className="px-1.5 py-0.5 bg-[#251e12] rounded border border-[#443317] font-mono text-white text-[11px]">Ctrl + V</kbd> to paste the clean image directly.
               </li>
               <li>
-                Or click the <strong className="text-white">📎 Paperclip icon</strong> and attach the downloaded <strong className="text-[#f7d070]">{filename}</strong>.
+                Or click the <strong className="text-white">📎 attach icon</strong> and select the downloaded file <strong className="text-[#f7d070]">{filename}</strong>.
+              </li>
+              <li>
+                Hit <strong className="text-emerald-400">Send</strong> — the poster sends cleanly with no description text.
               </li>
             </ol>
           </div>
 
           {/* Action links */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <div className="flex flex-col sm:flex-row items-center gap-2.5 pt-2">
             <a
-              href={whatsappUrl}
+              href={whatsappUrl || 'https://web.whatsapp.com/'}
               target="_blank"
               rel="noopener noreferrer"
-              className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-950 text-center"
+              className="w-full sm:flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950/40"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
-              <span>Open in WhatsApp Web</span>
+              <ExternalLink className="w-4 h-4" />
+              <span>Go to WhatsApp Web</span>
             </a>
 
-            {whatsappAppUrl && (
-              <a
-                href={whatsappAppUrl}
-                className="py-2.5 px-3 bg-[#241c10] hover:bg-[#342714] text-[#f7d070] border border-[#523e19] font-bold rounded-xl flex items-center justify-center gap-2 transition-all text-center"
-              >
-                <Smartphone className="w-3.5 h-3.5" />
-                <span>Open in WhatsApp App</span>
-              </a>
-            )}
-          </div>
-
-          {/* Message preview */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-semibold text-[#8c7f6b] uppercase">
-                Prepared Message Caption
-              </span>
+            {onCopyImageAgain && (
               <button
                 type="button"
-                onClick={handleCopyText}
-                className="text-[11px] text-[#f7d070] hover:text-white flex items-center gap-1 font-medium"
+                onClick={handleCopyClick}
+                className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-[#251e12] hover:bg-[#382b15] text-[#f7d070] border border-[#4d3a19] font-semibold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
               >
-                {copiedText ? (
+                {copiedSuccess ? (
                   <>
-                    <Check className="w-3 h-3 text-emerald-400" /> Copied!
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3 h-3" /> Copy Text
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Image Again</span>
                   </>
                 )}
               </button>
-            </div>
-            <pre className="p-3 bg-[#100d08] border border-[#3e3119] rounded-xl text-[#f3e3be] font-sans text-xs whitespace-pre-wrap max-h-32 overflow-y-auto leading-relaxed select-all">
-              {messageText}
-            </pre>
-          </div>
-
-          {/* Done button */}
-          <div className="flex items-center justify-end pt-2 border-t border-[#2e230f]">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 bg-[#20190e] hover:bg-[#302514] text-[#cfb684] rounded-xl border border-[#3e3119] font-medium transition-all"
-            >
-              Close
-            </button>
+            )}
           </div>
         </div>
       </div>

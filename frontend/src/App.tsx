@@ -3,7 +3,7 @@ import type { ShopSettings, DailyRate } from './types';
 import * as storage from './utils/storage';
 import { getTodayKolkataDate } from './utils/dateUtils';
 import { downloadPosterImage } from './utils/posterRenderer';
-import { sharePosterOnWhatsApp, generateWhatsAppMessage } from './utils/whatsappShare';
+import { sharePosterOnWhatsApp, copyPosterImageToClipboard } from './utils/whatsappShare';
 import { api } from './utils/apiService';
 
 import { Header } from './components/Header';
@@ -28,6 +28,7 @@ export const App: React.FC = () => {
   const [dateStr, setDateStr] = useState<string>(() => drafts.customDate || getTodayKolkataDate());
   const [isAutoDate, setIsAutoDate] = useState<boolean>(!drafts.customDate);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [isImageCopied, setIsImageCopied] = useState<boolean>(false);
 
   // Modal States
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
@@ -35,32 +36,61 @@ export const App: React.FC = () => {
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState<boolean>(false);
   const [isWhatsAppGuideOpen, setIsWhatsAppGuideOpen] = useState<boolean>(false);
   const [whatsAppGuideData, setWhatsAppGuideData] = useState<{
-    messageText: string;
     whatsappUrl: string;
-    whatsappAppUrl?: string;
     filename: string;
-    recipientPhone: string;
-  }>({ messageText: '', whatsappUrl: '', filename: '', recipientPhone: '' });
+  }>({ whatsappUrl: '', filename: '' });
 
   const canvasHandleRef = useRef<PosterCanvasHandle | null>(null);
 
-  // Persist draft changes
+  // Persist draft rates whenever valid rates change
   useEffect(() => {
-    storage.saveDraftRates({
+    if (goldRate > 0 && silverRate > 0) {
+      storage.saveDraftRates({
+        goldRate,
+        silverRate,
+        customDate: isAutoDate ? undefined : dateStr,
+      });
+    }
+  }, [goldRate, silverRate, dateStr, isAutoDate]);
+
+  // Helper to ensure rates are permanently saved to history and storage
+  const ensureRateSaved = async () => {
+    if (!goldRate || !silverRate) return;
+    const filename = `SRI_CHAIRMAN_JEWELLERS_DAILY_RATE_${dateStr}.png`;
+    const rateData = {
+      date: dateStr,
       goldRate,
       silverRate,
-      customDate: isAutoDate ? undefined : dateStr,
-    });
-  }, [goldRate, silverRate, dateStr, isAutoDate]);
+      timestamp: new Date().toISOString(),
+      posterFilename: filename,
+    };
+    storage.addOrUpdateDailyRate(rateData);
+    setHistory(storage.loadRateHistory());
+    api.saveRate(rateData).catch((err) => console.warn('Backend sync warning:', err));
+  };
 
   // Handle gold rate change
   const handleGoldRateChange = (newRate: number) => {
     setGoldRate(newRate);
+    if (newRate > 0) {
+      storage.saveDraftRates({
+        goldRate: newRate,
+        silverRate,
+        customDate: isAutoDate ? undefined : dateStr,
+      });
+    }
   };
 
   // Handle silver rate change
   const handleSilverRateChange = (newRate: number) => {
     setSilverRate(newRate);
+    if (newRate > 0) {
+      storage.saveDraftRates({
+        goldRate,
+        silverRate: newRate,
+        customDate: isAutoDate ? undefined : dateStr,
+      });
+    }
   };
 
   // Handle date change
@@ -77,9 +107,10 @@ export const App: React.FC = () => {
   };
 
   // Handle settings update
-  const handleSaveSettings = async (newSettings: ShopSettings) => {
+  const handleSaveSettings = (newSettings: ShopSettings) => {
     setSettings(newSettings);
-    await api.saveSettings(newSettings);
+    storage.saveSettings(newSettings);
+    api.saveSettings(newSettings).catch((err) => console.warn('Backend settings sync:', err));
   };
 
   // Generate poster action
@@ -89,23 +120,28 @@ export const App: React.FC = () => {
       if (canvasHandleRef.current) {
         await canvasHandleRef.current.triggerRender();
       }
-
-      // Record into History
-      const filename = `SRI_CHAIRMAN_JEWELLERS_DAILY_RATE_${dateStr}.png`;
-      await api.saveRate({
-        date: dateStr,
-        goldRate,
-        silverRate,
-        timestamp: new Date().toISOString(),
-        posterFilename: filename,
-      });
-
-      // Update local history state
-      setHistory(storage.loadRateHistory());
+      await ensureRateSaved();
     } catch (e) {
       console.error('Poster generation failed:', e);
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  // Direct copy poster image to clipboard
+  const handleCopyImage = async () => {
+    const canvas = canvasHandleRef.current?.getCanvas();
+    if (!canvas) return;
+    try {
+      await canvasHandleRef.current?.triggerRender();
+      const success = await copyPosterImageToClipboard(canvas);
+      if (success) {
+        setIsImageCopied(true);
+        setTimeout(() => setIsImageCopied(false), 2500);
+      }
+      await ensureRateSaved();
+    } catch (e) {
+      console.error('Failed to copy image to clipboard:', e);
     }
   };
 
@@ -115,34 +151,26 @@ export const App: React.FC = () => {
     if (!canvas) return;
     try {
       await downloadPosterImage(canvas, dateStr);
+      await ensureRateSaved();
     } catch (e) {
       console.error('Download failed:', e);
     }
   };
 
-  // Share WhatsApp action
+  // Share WhatsApp action (No default contact, no text description, user picks any contact/status)
   const handleShareWhatsApp = async () => {
     const canvas = canvasHandleRef.current?.getCanvas();
     if (!canvas) return;
 
     try {
-      const result = await sharePosterOnWhatsApp(
-        canvas,
-        goldRate,
-        silverRate,
-        dateStr,
-        settings
-      );
+      await ensureRateSaved();
+      const result = await sharePosterOnWhatsApp(canvas, dateStr, settings);
 
-      // If fallback triggered, show instruction modal
+      // If desktop fallback opened WhatsApp Web, display guide modal with clipboard notification
       if (result.method === 'whatsapp_web') {
-        const msg = generateWhatsAppMessage(goldRate, silverRate, dateStr, settings);
         setWhatsAppGuideData({
-          messageText: msg,
-          whatsappUrl: result.whatsappUrl || '',
-          whatsappAppUrl: result.whatsappAppUrl || '',
+          whatsappUrl: result.whatsappUrl || 'https://web.whatsapp.com/',
           filename: result.filename || `SRI_CHAIRMAN_JEWELLERS_DAILY_RATE_${dateStr}.png`,
-          recipientPhone: settings.whatsappNumber,
         });
         setIsWhatsAppGuideOpen(true);
       }
@@ -157,6 +185,11 @@ export const App: React.FC = () => {
     setSilverRate(item.silverRate);
     setDateStr(item.date);
     setIsAutoDate(false);
+    storage.saveDraftRates({
+      goldRate: item.goldRate,
+      silverRate: item.silverRate,
+      customDate: item.date,
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -171,7 +204,6 @@ export const App: React.FC = () => {
     setDateStr(item.date);
     setIsAutoDate(false);
 
-    // Wait short tick for canvas to update and download
     setTimeout(async () => {
       const canvas = canvasHandleRef.current?.getCanvas();
       if (canvas) {
@@ -207,9 +239,11 @@ export const App: React.FC = () => {
               onAutoDateToggle={handleAutoDateToggle}
               onSettingsChange={handleSaveSettings}
               onGeneratePoster={handleGeneratePoster}
+              onCopyImage={handleCopyImage}
               onDownloadPoster={handleDownloadPoster}
               onShareWhatsApp={handleShareWhatsApp}
               isGenerating={isGenerating}
+              isImageCopied={isImageCopied}
             />
           </div>
 
@@ -284,12 +318,10 @@ export const App: React.FC = () => {
       {/* WhatsApp Sharing Guidance Modal */}
       <WhatsAppGuideModal
         isOpen={isWhatsAppGuideOpen}
-        messageText={whatsAppGuideData.messageText}
         whatsappUrl={whatsAppGuideData.whatsappUrl}
-        whatsappAppUrl={whatsAppGuideData.whatsappAppUrl}
         filename={whatsAppGuideData.filename}
-        recipientPhone={whatsAppGuideData.recipientPhone}
         onClose={() => setIsWhatsAppGuideOpen(false)}
+        onCopyImageAgain={handleCopyImage}
       />
     </div>
   );

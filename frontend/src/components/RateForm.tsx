@@ -10,7 +10,6 @@ import {
   Coins,
   Sparkles,
   Calendar,
-  Phone,
   Download,
   Share2,
   Copy,
@@ -35,9 +34,11 @@ interface RateFormProps {
   onAutoDateToggle: (auto: boolean) => void;
   onSettingsChange: (settings: ShopSettings) => void;
   onGeneratePoster: () => void;
+  onCopyImage: () => void;
   onDownloadPoster: () => void;
   onShareWhatsApp: () => void;
   isGenerating?: boolean;
+  isImageCopied?: boolean;
 }
 
 export const RateForm: React.FC<RateFormProps> = ({
@@ -52,12 +53,12 @@ export const RateForm: React.FC<RateFormProps> = ({
   onAutoDateToggle,
   onSettingsChange,
   onGeneratePoster,
+  onCopyImage,
   onDownloadPoster,
   onShareWhatsApp,
   isGenerating = false,
+  isImageCopied = false,
 }) => {
-  const [copiedMessage, setCopiedMessage] = useState(false);
-  const [phoneSaved, setPhoneSaved] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [showAxisAdjuster, setShowAxisAdjuster] = useState(false);
 
@@ -70,15 +71,6 @@ export const RateForm: React.FC<RateFormProps> = ({
   const adjustSilver = (delta: number) => {
     const next = Math.max(1, (silverRate || 0) + delta);
     onSilverRateChange(next);
-  };
-
-  const handlePhoneChange = (val: string) => {
-    onSettingsChange({
-      ...settings,
-      whatsappNumber: val,
-    });
-    setPhoneSaved(true);
-    setTimeout(() => setPhoneSaved(false), 2000);
   };
 
   const handleGenerateClick = () => {
@@ -107,59 +99,46 @@ export const RateForm: React.FC<RateFormProps> = ({
     onGeneratePoster();
   };
 
-  const handleCopyMessage = async () => {
-    const text = `SRI CHAIRMAN JEWELLERS\n${settings.tamilShopName}\n\nஇன்றைய தங்கம் மற்றும் வெள்ளி விலை நிலவரம்:\n✨ 22K தங்கம்: ${formatIndianCurrency(goldRate)} / கிராம் (${formatIndianCurrency(goldRate * 8)} / சவரன்)\n✨ வெள்ளி: ${formatIndianCurrency(silverRate)} / கிராம் (${formatIndianCurrency(silverRate * 1000)} / கிலோ)\n📅 தேதி: ${dateStr}\n\n${settings.addressLine1} ${settings.addressLine2}\n${settings.footerText}`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopiedMessage(true);
-      setTimeout(() => setCopiedMessage(false), 2000);
-    } catch {
-      // fallback
-    }
-  };
-
   return (
-    <div className="flex flex-col gap-5 p-5 md:p-6 bg-[#16120b] border border-[#3d3118] rounded-2xl shadow-xl">
-      {/* Title */}
-      <div className="border-b border-[#2d2412] pb-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-[#f7d070]/20 to-[#9e6d0d]/10 border border-[#f7d070]/30 text-[#f7d070]">
-              <Coins className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-[#f7d070] tracking-wide">
-                DAILY PRICE ENTRY
-              </h2>
-              <p className="text-xs text-[#a99c85]">
-                Enter today's gold & silver rates per gram
-              </p>
-            </div>
+    <div className="flex flex-col gap-5 p-5 md:p-6 bg-[#16120b] border border-[#3d3118] rounded-2xl shadow-xl relative">
+      {/* Form Header */}
+      <div className="flex items-center justify-between border-b border-[#2d2412] pb-3.5">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-xl bg-[#271e0f] text-[#f7d070] border border-[#483719]">
+            <Coins className="w-5 h-5" />
           </div>
-          <span className="text-[11px] font-mono px-2.5 py-1 rounded-full bg-[#251e11] text-[#d4af37] border border-[#483719]">
-            INR (₹)
-          </span>
+          <div>
+            <h2 className="text-base font-bold text-[#f7d070] tracking-wide">
+              DAILY RATE ENTRY
+            </h2>
+            <p className="text-xs text-[#a99c85]">
+              Rates auto-save and update poster preview instantly
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#20190e] border border-[#443317] text-[11px] font-mono text-[#d4af37]">
+          <span>22K Purity</span>
         </div>
       </div>
 
       {/* Validation alert */}
       {validationError && (
-        <div className="flex items-center gap-2 p-3 text-xs bg-red-950/80 border border-red-700/60 text-red-200 rounded-xl">
-          <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
+        <div className="p-3 bg-red-950/80 border border-red-700/60 rounded-xl flex items-center gap-2 text-xs text-red-200">
+          <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
           <span>{validationError}</span>
         </div>
       )}
 
-      {/* 1. GOLD RATE INPUT */}
-      <div className="p-4 rounded-xl bg-[#1d170e] border border-[#4a391a] relative overflow-hidden group hover:border-[#735824] transition-all">
+      {/* 1. GOLD RATE INPUT (Per Gram) */}
+      <div className="p-4 rounded-xl bg-[#1d170e] border border-[#4d3a19] relative overflow-hidden group hover:border-[#7c5f2b] transition-all">
         <div className="flex items-center justify-between mb-2">
-          <label className="flex items-center gap-2 text-sm font-bold text-[#f7d070]">
+          <label className="flex items-center gap-2 text-sm font-bold text-[#fce8a6]">
             <span className="w-2 h-2 rounded-full bg-[#f7d070] shadow-[0_0_8px_#f7d070]" />
-            GOLD RATE (22K) – PER GRAM
+            GOLD RATE – 22K (PER GRAM)
           </label>
-          <span className="text-[11px] font-medium text-[#cbb994] bg-[#2a2010] px-2 py-0.5 rounded border border-[#443316]">
-            {settings.goldPurity}
+          <span className="text-[11px] font-medium text-[#cbb58c] bg-[#271d0e] px-2 py-0.5 rounded border border-[#433318]">
+            1 Gram
           </span>
         </div>
 
@@ -173,14 +152,14 @@ export const RateForm: React.FC<RateFormProps> = ({
             value={goldRate || ''}
             onChange={(e) => onGoldRateChange(Number(e.target.value) || 0)}
             placeholder="e.g. 12985"
-            className="w-full pl-10 pr-4 py-3 bg-[#110d08] border border-[#5a451e] rounded-xl text-2xl font-black text-white font-mono tracking-tight focus:outline-none focus:border-[#f7d070] focus:ring-2 focus:ring-[#f7d070]/20 transition-all placeholder:text-[#504432]"
+            className="w-full pl-10 pr-4 py-3 bg-[#110d08] border border-[#523e1b] rounded-xl text-2xl font-black text-white font-mono tracking-tight focus:outline-none focus:border-[#f7d070] focus:ring-2 focus:ring-[#f7d070]/20 transition-all placeholder:text-[#504432]"
           />
         </div>
 
-        {/* Real-time Sovereign Breakdown */}
+        {/* Real-time 8 Gram Sovereign / Pavan Breakdown */}
         <div className="mt-2.5 flex items-center justify-between text-xs text-[#b8a990] bg-[#140f09] px-3 py-1.5 rounded-lg border border-[#2b2110]">
           <span>1 பவுன் (8 கிராம் Sovereign):</span>
-          <span className="font-bold text-[#f7d070] font-mono">
+          <span className="font-bold text-[#fce8a6] font-mono">
             {formatIndianCurrency(goldRate * 8)}
           </span>
         </div>
@@ -193,7 +172,7 @@ export const RateForm: React.FC<RateFormProps> = ({
               key={delta}
               type="button"
               onClick={() => adjustGold(delta)}
-              className="px-2 py-1 text-[11px] font-mono font-medium rounded bg-[#251e12] hover:bg-[#382c16] text-[#e0cfab] hover:text-white border border-[#443417] transition-all"
+              className="px-2 py-1 text-[11px] font-mono font-medium rounded bg-[#251e12] hover:bg-[#382c16] text-[#e6cb91] hover:text-white border border-[#443317] transition-all"
             >
               {delta > 0 ? `+${delta}` : delta}
             </button>
@@ -201,7 +180,7 @@ export const RateForm: React.FC<RateFormProps> = ({
         </div>
       </div>
 
-      {/* 2. SILVER RATE INPUT */}
+      {/* 2. SILVER RATE INPUT (Per Gram) */}
       <div className="p-4 rounded-xl bg-[#1d170e] border border-[#3e3c3b] relative overflow-hidden group hover:border-[#6f757d] transition-all">
         <div className="flex items-center justify-between mb-2">
           <label className="flex items-center gap-2 text-sm font-bold text-[#e1e7ec]">
@@ -266,7 +245,7 @@ export const RateForm: React.FC<RateFormProps> = ({
               }
               onAutoDateToggle(!isAutoDate);
             }}
-            className={`text-[11px] font-semibold px-2 py-0.5 rounded transition-all flex items-center gap-1 ${
+            className={`text-[11px] font-semibold px-2 py-0.5 rounded transition-all flex items-center gap-1 cursor-pointer ${
               isAutoDate
                 ? 'bg-amber-950/70 text-[#f7d070] border border-[#f7d070]/40'
                 : 'bg-[#292010] text-[#a49882] border border-[#443317]'
@@ -303,35 +282,7 @@ export const RateForm: React.FC<RateFormProps> = ({
         </div>
       </div>
 
-      {/* 4. WHATSAPP RECIPIENT NUMBER */}
-      <div className="p-4 rounded-xl bg-[#1a140d] border border-[#362913]">
-        <div className="flex items-center justify-between mb-2">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-[#cfb684]">
-            <Phone className="w-4 h-4 text-emerald-400" />
-            WHATSAPP RECIPIENT NUMBER
-          </label>
-          {phoneSaved && (
-            <span className="flex items-center gap-1 text-[11px] text-emerald-400">
-              <Check className="w-3 h-3" /> Saved
-            </span>
-          )}
-        </div>
-
-        <div className="relative flex items-center">
-          <input
-            type="text"
-            value={settings.whatsappNumber}
-            onChange={(e) => handlePhoneChange(e.target.value)}
-            placeholder="+91 98765 43210"
-            className="w-full px-3.5 py-2.5 bg-[#100d08] border border-[#4a391a] rounded-xl text-sm font-mono text-white focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 transition-all placeholder:text-[#554734]"
-          />
-        </div>
-        <p className="mt-1 text-[11px] text-[#7e725d]">
-          Saved persistently. Country code (+91) applied automatically.
-        </p>
-      </div>
-
-      {/* 5. RATE & DATE AXIS & SIZE FINE-TUNER */}
+      {/* 4. RATE & DATE AXIS & SIZE FINE-TUNER */}
       <div className="rounded-xl border border-[#3e3017] bg-[#140f09] overflow-hidden shadow-lg transition-all">
         <button
           type="button"
@@ -361,9 +312,9 @@ export const RateForm: React.FC<RateFormProps> = ({
         )}
       </div>
 
-      {/* 6. PRIMARY ACTION BUTTONS */}
+      {/* 5. PRIMARY ACTION BUTTONS */}
       <div className="flex flex-col gap-3 pt-2">
-        {/* GENERATE TODAY'S POSTER (Primary Large Button) */}
+        {/* GENERATE TODAY'S POSTER (Primary Large Gold Button) */}
         <button
           type="button"
           onClick={handleGenerateClick}
@@ -374,7 +325,41 @@ export const RateForm: React.FC<RateFormProps> = ({
           <span>GENERATE TODAY'S POSTER</span>
         </button>
 
+        {/* COPY POSTER IMAGE (High-Priority Direct Image Copy) */}
+        <button
+          type="button"
+          onClick={onCopyImage}
+          className={`w-full py-3.5 px-4 rounded-xl font-extrabold text-sm tracking-wide transition-all flex items-center justify-center gap-2.5 cursor-pointer shadow-lg active:scale-[0.98] border-2 ${
+            isImageCopied
+              ? 'bg-emerald-950/90 border-emerald-500 text-emerald-200'
+              : 'bg-[#22180c] hover:bg-[#342410] border-[#d4af37] text-[#ffeaa7] hover:text-white'
+          }`}
+        >
+          {isImageCopied ? (
+            <>
+              <Check className="w-5 h-5 text-emerald-400 animate-bounce" />
+              <span>✓ POSTER IMAGE COPIED! PASTE (CTRL+V) IN WHATSAPP</span>
+            </>
+          ) : (
+            <>
+              <Copy className="w-5 h-5 text-[#f7d070]" />
+              <span>COPY POSTER IMAGE (Ready to Paste in WhatsApp)</span>
+            </>
+          )}
+        </button>
+
+        {/* SHARE ON WHATSAPP + DOWNLOAD PNG (Dual Row) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          {/* SHARE ON WHATSAPP (No default contacts, clean image share) */}
+          <button
+            type="button"
+            onClick={onShareWhatsApp}
+            className="py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wide text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 border border-emerald-400/40 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-900/30 active:scale-[0.98]"
+          >
+            <Share2 className="w-4 h-4 text-emerald-100" />
+            <span>SHARE ON WHATSAPP</span>
+          </button>
+
           {/* DOWNLOAD POSTER */}
           <button
             type="button"
@@ -384,36 +369,12 @@ export const RateForm: React.FC<RateFormProps> = ({
             <Download className="w-4 h-4 text-[#f7d070]" />
             <span>DOWNLOAD PNG</span>
           </button>
-
-          {/* SHARE ON WHATSAPP */}
-          <button
-            type="button"
-            onClick={onShareWhatsApp}
-            className="py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wide text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 border border-emerald-400/40 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-emerald-900/30 active:scale-[0.98]"
-          >
-            <Share2 className="w-4 h-4 text-emerald-100" />
-            <span>SHARE WHATSAPP</span>
-          </button>
         </div>
 
-        {/* Copy Message shortcut */}
-        <button
-          type="button"
-          onClick={handleCopyMessage}
-          className="w-full py-2 px-3 text-xs text-[#a99c85] hover:text-[#f7d070] bg-[#141009] hover:bg-[#1f180d] rounded-lg border border-[#2d220e] transition-all flex items-center justify-center gap-1.5"
-        >
-          {copiedMessage ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-emerald-400 font-medium">Text Copied to Clipboard!</span>
-            </>
-          ) : (
-            <>
-              <Copy className="w-3.5 h-3.5" />
-              <span>Copy WhatsApp Text Summary</span>
-            </>
-          )}
-        </button>
+        {/* Helpful Tip */}
+        <p className="text-center text-[11px] text-[#9a8d76] mt-1">
+          💡 Select any contact, group, or Status in WhatsApp. Paste with <kbd className="px-1.5 py-0.5 bg-[#1f170c] rounded border border-[#3b2d16] font-mono text-white text-[10px]">Ctrl + V</kbd>.
+        </p>
       </div>
     </div>
   );
