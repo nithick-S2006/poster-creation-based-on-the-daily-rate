@@ -28,22 +28,22 @@ export const DEFAULT_SETTINGS: ShopSettings = {
   useBackendApi: false,
 
   // Default text axis positions & font sizes on 1080x1920 canvas
-  goldRateX: 685,
+  goldRateX: 689,
   goldRateY: 948,
   goldRateSize: 104,
   goldBgPatch: false,
   goldBgWidth: 480,
   goldBgHeight: 110,
 
-  silverRateX: 700,
-  silverRateY: 1595,
+  silverRateX: 703,
+  silverRateY: 1580,
   silverRateSize: 104,
   silverBgPatch: false,
   silverBgWidth: 480,
   silverBgHeight: 110,
 
   dateX: 540,
-  dateY: 1790,
+  dateY: 1785,
   dateSize: 36,
   dateBgPatch: false,
   dateBgWidth: 400,

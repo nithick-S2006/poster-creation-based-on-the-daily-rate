@@ -23,34 +23,34 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
 
   const nudge = (key: 'gold' | 'silver' | 'date', axis: 'x' | 'y', delta: number) => {
     if (key === 'gold') {
-      if (axis === 'x') updateSetting('goldRateX', (settings.goldRateX ?? 685) + delta);
+      if (axis === 'x') updateSetting('goldRateX', (settings.goldRateX ?? 689) + delta);
       if (axis === 'y') updateSetting('goldRateY', (settings.goldRateY ?? 948) + delta);
     } else if (key === 'silver') {
-      if (axis === 'x') updateSetting('silverRateX', (settings.silverRateX ?? 700) + delta);
-      if (axis === 'y') updateSetting('silverRateY', (settings.silverRateY ?? 1595) + delta);
+      if (axis === 'x') updateSetting('silverRateX', (settings.silverRateX ?? 703) + delta);
+      if (axis === 'y') updateSetting('silverRateY', (settings.silverRateY ?? 1580) + delta);
     } else if (key === 'date') {
       if (axis === 'x') updateSetting('dateX', (settings.dateX ?? 540) + delta);
-      if (axis === 'y') updateSetting('dateY', (settings.dateY ?? 1790) + delta);
+      if (axis === 'y') updateSetting('dateY', (settings.dateY ?? 1785) + delta);
     }
   };
 
   const handleResetDefaults = () => {
     onChange({
       ...settings,
-      goldRateX: 685,
+      goldRateX: 689,
       goldRateY: 948,
       goldRateSize: 104,
       goldBgPatch: false,
       goldBgWidth: 480,
       goldBgHeight: 110,
-      silverRateX: 700,
-      silverRateY: 1595,
+      silverRateX: 703,
+      silverRateY: 1580,
       silverRateSize: 104,
       silverBgPatch: false,
       silverBgWidth: 480,
       silverBgHeight: 110,
       dateX: 540,
-      dateY: 1790,
+      dateY: 1785,
       dateSize: 36,
       dateBgPatch: false,
       dateBgWidth: 400,
@@ -111,7 +111,7 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
               Gold Rate
             </span>
             <span className="font-mono text-[10px] text-[#cfb684]">
-              ({settings.goldRateX ?? 685}, {settings.goldRateY ?? 948}) • {settings.goldRateSize ?? 104}px
+              ({settings.goldRateX ?? 689}, {settings.goldRateY ?? 948}) • {settings.goldRateSize ?? 104}px
             </span>
           </div>
 
@@ -176,13 +176,13 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
             <div>
               <div className="flex justify-between text-[10px] text-[#a99c85]">
                 <span>X Position (Horizontal):</span>
-                <span className="font-mono">{settings.goldRateX ?? 685}px</span>
+                <span className="font-mono">{settings.goldRateX ?? 689}px</span>
               </div>
               <input
                 type="range"
                 min="500"
                 max="900"
-                value={settings.goldRateX ?? 685}
+                value={settings.goldRateX ?? 689}
                 onChange={(e) => updateSetting('goldRateX', Number(e.target.value))}
                 className="w-full accent-[#f7d070] h-1.5 bg-[#0f0c08] rounded cursor-pointer"
               />
@@ -250,7 +250,7 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
               Silver Rate
             </span>
             <span className="font-mono text-[10px] text-[#b0bac5]">
-              ({settings.silverRateX ?? 700}, {settings.silverRateY ?? 1595}) • {settings.silverRateSize ?? 104}px
+              ({settings.silverRateX ?? 703}, {settings.silverRateY ?? 1580}) • {settings.silverRateSize ?? 104}px
             </span>
           </div>
 
@@ -315,13 +315,13 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
             <div>
               <div className="flex justify-between text-[10px] text-[#a99c85]">
                 <span>X Position (Horizontal):</span>
-                <span className="font-mono">{settings.silverRateX ?? 700}px</span>
+                <span className="font-mono">{settings.silverRateX ?? 703}px</span>
               </div>
               <input
                 type="range"
                 min="500"
                 max="900"
-                value={settings.silverRateX ?? 700}
+                value={settings.silverRateX ?? 703}
                 onChange={(e) => updateSetting('silverRateX', Number(e.target.value))}
                 className="w-full accent-[#d0d7de] h-1.5 bg-[#0f0c08] rounded cursor-pointer"
               />
@@ -330,13 +330,13 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
             <div>
               <div className="flex justify-between text-[10px] text-[#a99c85]">
                 <span>Y Position (Vertical):</span>
-                <span className="font-mono">{settings.silverRateY ?? 1595}px</span>
+                <span className="font-mono">{settings.silverRateY ?? 1580}px</span>
               </div>
               <input
                 type="range"
                 min="1450"
                 max="1700"
-                value={settings.silverRateY ?? 1595}
+                value={settings.silverRateY ?? 1580}
                 onChange={(e) => updateSetting('silverRateY', Number(e.target.value))}
                 className="w-full accent-[#d0d7de] h-1.5 bg-[#0f0c08] rounded cursor-pointer"
               />
@@ -389,7 +389,7 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
               Date
             </span>
             <span className="font-mono text-[10px] text-[#cfb684]">
-              ({settings.dateX ?? 540}, {settings.dateY ?? 1790}) • {settings.dateSize ?? 36}px
+              ({settings.dateX ?? 540}, {settings.dateY ?? 1785}) • {settings.dateSize ?? 36}px
             </span>
           </div>
 
@@ -469,13 +469,13 @@ export const AxisAdjuster: React.FC<AxisAdjusterProps> = ({
             <div>
               <div className="flex justify-between text-[10px] text-[#a99c85]">
                 <span>Y Position (Vertical):</span>
-                <span className="font-mono">{settings.dateY ?? 1790}px</span>
+                <span className="font-mono">{settings.dateY ?? 1785}px</span>
               </div>
               <input
                 type="range"
                 min="1700"
                 max="1840"
-                value={settings.dateY ?? 1790}
+                value={settings.dateY ?? 1785}
                 onChange={(e) => updateSetting('dateY', Number(e.target.value))}
                 className="w-full accent-[#fce8a6] h-1.5 bg-[#0f0c08] rounded cursor-pointer"
               />

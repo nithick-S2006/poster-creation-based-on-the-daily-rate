@@ -43,7 +43,7 @@ export async function renderPosterToCanvas(
   const isCustomModular = settings.posterMode === 'custom_modular';
   const baseTemplateSrc = isCustomModular
     ? '/assets/poster_template_custom_1080x1920.png'
-    : '/assets/poster_template_clean_1080x1920.png?v=clean_v4';
+    : '/assets/poster_template_clean_1080x1920.png?v=clean_v5';
 
   try {
     const baseImg = await loadImage(baseTemplateSrc);
@@ -78,7 +78,7 @@ export async function renderPosterToCanvas(
   }
 
   // 1. DYNAMIC GOLD RATE (Adjustable X, Y & Size)
-  const goldX = settings.goldRateX ?? 685;
+  const goldX = settings.goldRateX ?? 689;
   const goldY = settings.goldRateY ?? 948;
   if (settings.goldBgPatch) {
     drawAdjustablePatch(ctx, goldX, goldY, settings.goldBgWidth ?? 480, settings.goldBgHeight ?? 110);
@@ -86,8 +86,8 @@ export async function renderPosterToCanvas(
   renderGoldRatePrice(ctx, goldX, goldY, goldRate, settings.goldRateSize ?? 104);
 
   // 2. DYNAMIC SILVER RATE (Adjustable X, Y & Size)
-  const silverX = settings.silverRateX ?? 700;
-  const silverY = settings.silverRateY ?? 1595;
+  const silverX = settings.silverRateX ?? 703;
+  const silverY = settings.silverRateY ?? 1580;
   if (settings.silverBgPatch) {
     drawAdjustablePatch(ctx, silverX, silverY, settings.silverBgWidth ?? 480, settings.silverBgHeight ?? 110);
   }
@@ -95,7 +95,7 @@ export async function renderPosterToCanvas(
 
   // 3. DYNAMIC DATE (Adjustable X, Y & Size)
   const dateX = settings.dateX ?? 540;
-  const dateY = settings.dateY ?? 1790;
+  const dateY = settings.dateY ?? 1785;
   if (settings.dateBgPatch) {
     drawAdjustablePatch(ctx, dateX, dateY, settings.dateBgWidth ?? 380, settings.dateBgHeight ?? 45, 8);
   }
